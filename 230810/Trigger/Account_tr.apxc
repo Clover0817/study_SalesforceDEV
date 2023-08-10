@@ -1,0 +1,57 @@
+public with sharing class Account_tr extends TriggerHandler {
+ 	private List<Account> listNew {get; set;}
+    private List<Account> listOld {get; set;}
+    private Map<Id, Account> mapNew {get; set;}
+    private Map<Id, Account> mapOld {get; set;}
+
+    public Account_tr(){
+        listNew = (List<Account>)Trigger.new;
+        listOld = (List<Account>)Trigger.old;
+        mapNew = (Map<Id,Account>)Trigger.newMap;
+        mapOld = (Map<Id,Account>)Trigger.oldMap;
+    }
+    public override void beforeInsert(){
+        doInsertAccount();
+    }
+
+    public override void afterInsert(){
+    }
+
+    public override void beforeUpdate(){
+        doUpdateAccount();
+    }
+
+    public override void afterUpdate(){
+    }
+
+    public override void beforeDelete(){
+        doDeleteAccount();
+    }
+    
+    //Account 생성시, Rating 값을 'Cold'로 지정
+    public void doInsertAccount() {
+        for (Account objNew : listNew) {
+            if (objNew.Rating == null) {
+                //before라서 update문 돌릴 필요 없음
+                objNew.Rating = 'Cold';
+            }
+        }
+    }
+    
+    //Trigger.newMap을 이용해 addError() 발생
+    public void doUpdateAccount() {
+        for (Account objNew : listNew) {
+            if (mapOld.get(objNew.Id).Rating == 'Hot') { //과거의 것을 봐야 
+				objNew.addError('Rating값이 Hot일 때는 수정을 할 수 없습니다.');            
+            }
+        }
+    }
+    
+    public void doDeleteAccount() {
+        for (Account obj : listOld) { //delete할 땐 old
+            if (obj.Rating == 'Hot') {
+                obj.addError('Rating값이 Hot일 때는 삭제를 할 수 없습니다.');
+            }
+        }
+    }
+}
