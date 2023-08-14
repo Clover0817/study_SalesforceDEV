@@ -1,4 +1,4 @@
-problem&solution
+<h3>problem&solution</h3>
 1. navigation bar에서 custom object 표시하기
 <br/>-Whenever you are creating new custom object,before saving that object you will find a section called Object Creation Options (Available only when custom object is first created),in that section you need to select Launch New Custom Tab Wizard after saving this custom object checkbox.And after saving you will find a field called tabstyle,there you need to select any according to your choice and after that do next next then save.
 <br/><br/>Go to setup->search tabs->search your created object in object field->select any tab style->Next->Next->Save
