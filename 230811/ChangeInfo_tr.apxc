@@ -1,0 +1,44 @@
+/*해결되지 않은 코드*/
+public with sharing class ChangeInfo_tr extends TriggerHandler {
+    private List<ChangeInfo__c> listNew {get; set;}
+    private List<ChangeInfo__c> listOld {get; set;}
+    private Map<Id, ChangeInfo__c> mapNew {get; set;}
+    private Map<Id, ChangeInfo__c> mapOld {get; set;}
+   	private Set<Id> Ids = new Set<Id>();
+    
+    public ChangeInfo_tr() {
+        listNew = (List<ChangeInfo__c>)Trigger.new;
+        listOld = (List<ChangeInfo__c>)Trigger.old;
+        mapNew = (Map<Id, ChangeInfo__c>)Trigger.newMap;
+        mapOld = (Map<Id, ChangeInfo__c>)Trigger.oldMap;
+        
+        for(ChangeInfo__c ci : listNew) {
+            Ids.add(ci.Id);
+        }
+    }
+    
+    public override void beforeInsert() {
+    }
+    
+    public override void afterInsert() {}
+    
+    public override void beforeUpdate() {
+         doUpdateInfo();
+    }
+    
+    public override void afterUpdate() {
+    }
+    
+    public override void beforeDelete() {
+    }
+    
+    //학생 정보 변경 승인 필드값이 True일 때, 해당 학생정보를 Update
+    public void doUpdateInfo() {
+        for (ChangeInfo__c objNew : [SELECT Id, IsApproved__c, Address__c, Phone__c, Student__r.Address__c, Student__r.Phone__c FROM ChangeInfo__c WHERE Id IN:Ids]) {
+            if (objNew.IsApproved__c == True) {
+                objNew.Student__r.Address__c = objNew.Address__c;
+                objNew.Student__r.Phone__c = objNew.Phone__c;
+            } 
+        }
+    }
+}
