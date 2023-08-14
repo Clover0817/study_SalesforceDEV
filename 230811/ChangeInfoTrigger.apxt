@@ -1,0 +1,3 @@
+trigger ChangeInfoTrigger on ChangeInfo__c(before insert, before update, before delete, after insert, after update, after delete) {
+	new ChangeInfo_tr().run();
+}
