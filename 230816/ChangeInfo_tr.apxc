@@ -1,0 +1,54 @@
+/*정상 작동 코드*/
+public with sharing class ChangeInfo_tr extends TriggerHandler {
+    private List<ChangeInfo__c> listNew {get; set;}
+    private List<ChangeInfo__c> listOld {get; set;}
+    private Map<Id, ChangeInfo__c> mapNew {get; set;}
+    private Map<Id, ChangeInfo__c> mapOld {get; set;}
+   	private Set<Id> Ids = new Set<Id>();
+    
+    public ChangeInfo_tr() {
+        listNew = (List<ChangeInfo__c>)Trigger.new;
+        listOld = (List<ChangeInfo__c>)Trigger.old;
+        mapNew = (Map<Id, ChangeInfo__c>)Trigger.newMap;
+        mapOld = (Map<Id, ChangeInfo__c>)Trigger.oldMap;
+        
+        for(ChangeInfo__c ci : listNew) {
+            Ids.add(ci.Id);
+        }
+    }
+    
+    public override void beforeInsert() {
+    }
+    
+    public override void afterInsert() {
+    }
+    
+    public override void beforeUpdate() {
+          doUpdateInfo(listNew);
+    }
+    
+    public override void afterUpdate() {
+    }
+    
+    public override void beforeDelete() {
+    }
+    
+    //학생 정보 변경 승인 필드값이 True일 때, 해당 학생정보를 Update
+    public static void doUpdateInfo(List<ChangeInfo__c> changeRequests) {
+        List<Contact> contactsToUpdate = new List<Contact>();
+        
+        for (ChangeInfo__c changeRequest : changeRequests) {
+            if (changeRequest.IsApproved__c && changeRequest.Student__c != null) {
+                contactsToUpdate.add(new Contact(
+                    Id = changeRequest.Student__c,
+                    Address__c = changeRequest.Address__c,
+                    Phone__c = changeRequest.Phone__c
+                ));
+            }
+        }
+        
+        if (!contactsToUpdate.isEmpty()) {
+            update contactsToUpdate;
+        }
+    }
+}
