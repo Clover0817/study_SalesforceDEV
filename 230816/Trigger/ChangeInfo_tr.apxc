@@ -1,4 +1,4 @@
-/*정상 작동 코드*/
+/*230811 코드 에러 해결-정상 작동 코드*/
 public with sharing class ChangeInfo_tr extends TriggerHandler {
     private List<ChangeInfo__c> listNew {get; set;}
     private List<ChangeInfo__c> listOld {get; set;}
