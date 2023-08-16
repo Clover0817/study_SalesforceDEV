@@ -1,4 +1,4 @@
-/*해결되지 않은 코드*/
+/*해결되지 않은 코드-에러는 안 나는데, 필드 값 변경 적용이 안됨*/
 public with sharing class ChangeInfo_tr extends TriggerHandler {
     private List<ChangeInfo__c> listNew {get; set;}
     private List<ChangeInfo__c> listOld {get; set;}
