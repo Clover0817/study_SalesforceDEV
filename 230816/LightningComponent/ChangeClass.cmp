@@ -1,4 +1,4 @@
-//해결되지 않은 코드1
+//해결되지 않은 코드
 <aura:component description="ChangeClass" controller="ChangeClassController" implements="force:hasRecordId,force:lightningQuickActionWithoutHeader,flexipage:availableForAllPageTypes">
     <aura:attribute name="objStudent" type="Object" default=""/>
     <aura:attribute name="options" type="String[]" default="[]"/>
