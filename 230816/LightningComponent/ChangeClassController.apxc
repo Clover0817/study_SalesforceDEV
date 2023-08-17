@@ -1,4 +1,4 @@
-//해결되지 않은 코드1
+//해결되지 않은 코드
 public with sharing class ChangeClassController {
 	@AuraEnabled
     public static List<Class__c> getInitData(String recordId) {
