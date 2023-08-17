@@ -1,0 +1,67 @@
+<!--************************************************************************************
+ * Description : 출석부 출력
+ *
+ * Ver      Date           Author          Modification
+ * ===================================================================================
+   1.0      2022-09-06     yr.lee          Create
+*************************************************************************************-->
+
+
+<apex:page id="PrintStudentList" controller="PrintStudentListController" renderAs="pdf">
+    <html>
+    <head>
+        <style>
+            .page {
+                width : 850px;
+                height : 1130px;
+                font-family: 'Arial Unicode MS';
+            }
+            @page {
+                size: A4;
+                margin 0;
+            }
+            table, th, tr, td{
+                table-layout: fixed;
+                border-collapse: collapse;
+                border:black solid 1px;
+                font-size : 10pt;
+            }
+            .body{
+                font-family: 'Arial Unicode MS';
+            }
+            div.onepage {
+                page-break-before: always;
+            }
+        </style>
+    </head>
+    <body>
+    <div class="page">
+        <div style="text-align:center;width:100%;font-size:28px;font-family:'Arial Unicode MS'">출석부 Sample</div>
+
+        <div style="margin-top:30px;padding-left:40%;font-family:'Arial Unicode MS'">
+            <table style="border:black solid 1px;border-collapse:collapse">
+                <tr>
+                    <td style="border:black solid 1px;">순번</td>
+                    <td style="border:black solid 1px;">이름</td>
+                    <td style="border:black solid 1px;">생년월일</td>
+                </tr>
+                <apex:variable var="i" value="{!1}"/>
+                <apex:repeat value="{!listContact}" var="obj">
+                    <tr>
+                        <td style="border:black solid 1px;">{!i}</td>
+                        <td style="border:black solid 1px;">{!obj.LastName}</td>
+                        <td style="border:black solid 1px;">
+                            <apex:outputText value="{0,date,yyyy-MM-dd}">
+                                <apex:param value="{!obj.BirthDate}" />
+                            </apex:outputText>
+                        </td>
+                    </tr>
+                    <apex:variable var="i" value="{!i + 1}"/>
+                </apex:repeat>
+            </table>
+        </div>
+    </div>
+    </body>
+    </html>
+
+</apex:page>
