@@ -8,18 +8,10 @@ public with sharing class ChangeClassController {
     }
     
     @AuraEnabled
-    public static void confirmChangeClass(String recordId, Id classId) {
-        try {
-            Contact student = [SELECT Id, Class__c FROM Contact WHERE Id = :recordId];
-            Class__c selectedClass = [SELECT Id, ClassNumber__c FROM Class__c WHERE Id = :classId];
-            
-            if (student.Class__c == null || selectedClass.ClassNumber__c == student.Class__r.ClassNumber__c) {
-                student.Class__c = classId;
-            } else {
-                throw new AuraHandledException('현재 해당하는 반을 선택할 수 없습니다.');
-            }
-        } catch (Exception e) {
-            throw new AuraHandledException('Failed to move student to a different class: ' + e.getMessage());
-        }
+    public static Class__c confirmChangeClass(String recordId, String classId) {
+        Contact student = [SELECT Id, Class__c FROM Contact WHERE Id =: recordId];
+        Class__c selectedClass = [SELECT Id, Grade__c, ClassNumber__c FROM Class__c WHERE Id =: classId];
+        
+        return selectedClass;
     }
 }
