@@ -1,5 +1,6 @@
 //피드백 코드
 //List 변수명 규칙 -> list**
+//before 아니고 after
 public with sharing class ChangeInfo_tr extends TriggerHandler {
     private List<ChangeInfo__c> listNew {get; set;}
     private List<ChangeInfo__c> listOld {get; set;}
@@ -19,10 +20,10 @@ public with sharing class ChangeInfo_tr extends TriggerHandler {
     public override void afterInsert() {}
     
     public override void beforeUpdate() {
-          doUpdateInfo(listNew);
     }
     
     public override void afterUpdate() {
+        doUpdateInfo(listNew);
     }
     
     public override void beforeDelete() {
