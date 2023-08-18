@@ -1,0 +1,11 @@
+//해결되지 않은 코드2
+<aura:component description="ChangeClass" controller="ChangeClassController" implements="force:hasRecordId,force:lightningQuickActionWithoutHeader,flexipage:availableForAllPageTypes">
+    <aura:attribute name="objStudent" type="Object" default=""/>
+    <aura:attribute name="options" type="String[]" default="[]"/>
+	<aura:handler name="init" value="{!this}" action="{!c.fnInit}"/>
+    <lightning:combobox name="반 이동" label="반 이동" value="{!v.objStudent.Class__r.Name}" placeholder="이동할 반을 선택하세요." options="{! v.options }" onchange="{! c.handleChange }"/>
+	<div class="slds-m-top_medium">
+        <lightning:button label="Confirm" variant="brand" onclick="{!c.confirmChangeClass}" class="slds-m-right_small" />
+        <lightning:button label="Cancel" onclick="{!c.handleCancel}" />
+    </div>
+</aura:component>
