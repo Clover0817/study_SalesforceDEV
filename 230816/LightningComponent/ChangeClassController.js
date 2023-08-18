@@ -1,66 +1,46 @@
 ({
-    getInitData: function(component, event, helper) {
-        var action = component.get("c.getInitData");
+    fnInit : function(component, event, helper) {
+       console.log('recordId :: ' + component.get("v.recordId"));
+       helper.getInitData(component);
+    },
+    
+    confirmChangeClass : function(component, event, helper) {
+        var selectedClass = event.getParam("value"); // Ensure that selectedClass is set correctly
 
+        if (!selectedClass) {
+            helper.showToast("error", "이동할 반을 선택해 주세요.");
+            return;
+        } else {
+            var student = component.get("v.objStudent");
+            if (student.Class__c == null || (student.Class__r.Grade__c == selectedClass.Grade__c && student.Class__r.ClassNumber__c != selectedClass.ClassNumber__c)) {
+                student.Class__c = selectedClass.Id; // Update the student's class
+            } else if (student.Class__c == selectedClass.Id) {
+                helper.showToast("error", '이미 지정되어 있는 반입니다.');
+            } else {
+                helper.showToast("error", '타학년 반을 선택할 수 없습니다.');
+            }
+        }
+
+        // Call the server action to confirm the class change
+        var action = component.get("c.confirmChangeClass");
         action.setParams({
-            recordId : component.get("v.recordId")
+            recordId : component.get("v.recordId"),
+            classId: selectedClass.Id // Pass the selected class Id to the server action
         });
         action.setCallback(this, function(response) {
             var state = response.getState();
             if (state === "SUCCESS") {
                 var returnValue = response.getReturnValue();
                 console.log(returnValue);
-				var options = returnValue.map(function(item) {
-                    return { label: item.Name, value: item.Id };
-                });
-                component.set("v.options", options);
-            } else if (state === "ERROR") {
-                var errors = response.getError();
-                if(errors) {
-                    //참고 :에러가 났을경우는 주로 ShowToast 함수를 이용하여 토스트 메시지를 띄움
-                    this.showToast("error", "실패");
-                } else {
-                    this.showToast("success", "성공");
-                }
             }
         });
-        $A.enqueueAction(action);
-    },
-
-    confirmChangeClass : function(component, event, helper) {
-        var selectedClassId = component.get("v.selectedClassId");
+        $A.enqueueAction(action); // Enqueue the server action
         
-        if (!selectedClassId) {
-            helper.showToast("error", "Please select a class.");
-            return;
-        }
-
-        var overlayLib = component.find("overlayLib");
-        var modalPromise = overlayLib.showCustomModal({
-            header: "Confirm",
-            body: "정말로 반 이동을 하시겠습니까?",
-            showCloseButton: true,
-            footer: [
-                {
-                    label: "Cancel",
-                    variant: "neutral",
-                    onclick: function() {
-                        overlayLib.notifyClose();
-                    }
-                },
-                {
-                    label: "Confirm",
-                    variant: "brand",
-                    onclick: function() {
-                        overlayLib.notifyClose();
-                        helper.confirmChangeClass(component, selectedClassId);
-                    }
-                }
-            ]
-        });
+        // Close the quick action modal
+        $A.get("e.force:closeQuickAction").fire();
     },
     
-    handleCancel: function(component, event, helper) {
-       $A.get("e.force:closeQuickAction").fire();
+    handleCancel : function(component, event, helper) {
+        $A.get("e.force:closeQuickAction").fire();
     }
-})
+});
