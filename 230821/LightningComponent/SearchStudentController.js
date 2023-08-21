@@ -1,36 +1,30 @@
 ({
-    searchStudents: function(component) {
-        var action = component.get("c.searchStudents");
-        var searchParams = component.get("v.searchParams");
-
-        action.setParams({
-            grade: searchParams.grade,
-            classNumber: searchParams.classNumber,
-            name: searchParams.name
-        });
-
-        action.setCallback(this, function(response) {
-            var state = response.getState();
-            if (state === "SUCCESS") {
-                var result = response.getReturnValue();
-                if (result.length === 0) {
-                    this.showToast("info", "검색된 내역이 없습니다.");
-                }
-                component.set("v.studentList", result);
-                component.set("v.totalRecords", result.length);
-            } else if (state === "ERROR") {
-                this.showToast("error", "오류가 발생하였습니다.");
-            }
-        });
-        $A.enqueueAction(action);
+    doInit: function(component, event, helper) {
+        component.set('v.columns', [
+            {label: '학생 정보', fieldName: 'Id', type: 'url', typeAttributes: {label: {fieldName: 'Name'}, target: '_blank'}},
+            {label: '학년', fieldName: 'Grade__c', type: 'text'},
+            {label: '반', fieldName: 'ClassNumber__c', type: 'text'}
+        ]);
     },
-
-    showToast: function(type, message) {
-        var toastEvent = $A.get("e.force:showToast");
-        toastEvent.setParams({
-            "type": type,
-            "message": message
+    
+    searchStudents: function(component, event, helper) {
+        var searchParams = component.get("v.searchParams");
+        
+        if (!searchParams.grade && !searchParams.classNumber && !searchParams.name) {
+            helper.showToast("error", "조건을 입력해 주세요.");
+            return;
+        }
+        
+        helper.searchStudents(component);
+    },
+    
+    navigateToDetail: function (component, event, helper) {
+        var row = event.getParam('row');
+        var navEvt = $A.get("e.force:navigateToSObject");
+        navEvt.setParams({
+            "recordId": row.Id,
+            "slideDevName": "detail"
         });
-        toastEvent.fire();
+        navEvt.fire();
     }
 })
