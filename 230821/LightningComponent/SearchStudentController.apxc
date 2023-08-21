@@ -1,0 +1,33 @@
+public with sharing class SearchStudentController {
+    @AuraEnabled
+    public static List<StudentWrapper> searchStudents(Integer grade, Integer classNumber, String name) {
+        List<StudentWrapper> results = new List<StudentWrapper>();
+
+        String dynamicQuery = 'SELECT Id, Name, Class__r.Grade__c, Class__r.ClassNumber__c FROM Contact WHERE';
+        dynamicQuery += ' Class__r.Grade__c = ' + grade;
+        dynamicQuery += ' AND Class__r.ClassNumber__c = ' + classNumber;
+        dynamicQuery += ' AND Name LIKE \'%' + name + '%\'';
+
+        List<Contact> students = Database.query(dynamicQuery);
+
+        for (Contact student : students) {
+            results.add(new StudentWrapper(student));
+        }
+
+        return results;
+    }
+
+    public class StudentWrapper {
+        @AuraEnabled public Id Id { get; private set; }
+        @AuraEnabled public String Name { get; private set; }
+        @AuraEnabled public Integer Grade { get; private set; }
+        @AuraEnabled public Integer ClassNumber { get; private set; }
+
+        public StudentWrapper(Contact student) {
+            this.Id = student.Id;
+            this.Name = student.Name;
+            this.Grade = Integer.valueOf(student.Class__r.Grade__c);
+            this.ClassNumber = Integer.valueOf(student.Class__r.ClassNumber__c);
+        }
+    }
+}
