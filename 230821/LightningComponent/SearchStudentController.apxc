@@ -1,3 +1,4 @@
+//해결되지 않은 코드
 public with sharing class SearchStudentController {
     @AuraEnabled
     public static List<StudentWrapper> searchStudents(Integer grade, Integer classNumber, String name) {
