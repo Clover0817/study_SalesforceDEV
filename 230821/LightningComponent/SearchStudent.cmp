@@ -1,0 +1,24 @@
+<aura:component controller="SearchStudentController" implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome">
+    <aura:attribute name="studentList" type="List" default="[]"/>
+    <aura:attribute name="totalRecords" type="Integer" default="0"/>
+    <aura:attribute name="searchParams" type="Object" default="{}"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+
+    <lightning:card title="학생 정보 조회">
+        <div class="slds-p-around_medium">
+            <lightning:input label="학년" value="{!v.searchParams.grade}" />
+            <lightning:input label="반" value="{!v.searchParams.classNumber}" />
+            <lightning:input label="이름" value="{!v.searchParams.name}" />
+            <lightning:button label="조회" variant="brand" onclick="{!c.searchStudents}" />
+        </div>
+        <div class="slds-p-around_medium">
+            <p>총 {!v.totalRecords} 건</p>
+            <lightning:datatable
+                    columns="{!v.columns}"
+                    data="{!v.studentList}"
+                    keyField="Id"
+                    onrowaction="{!c.navigateToDetail}"
+            />
+        </div>
+    </lightning:card>
+</aura:component>
