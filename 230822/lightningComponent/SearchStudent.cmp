@@ -1,0 +1,34 @@
+<!--
+ - Created by skdus on 2023-08-21.
+ -->
+
+<aura:component controller="SearchStudentController" implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome">
+    <aura:attribute name="grade" type="Integer" />
+    <aura:attribute name="classNumber" type="Integer" />
+    <aura:attribute name="name" type="String" />
+    <aura:attribute name="students" type="List" />
+    <aura:attribute name="columns" type="List"/>
+    <lightning:card title="학생 정보 조회">
+        <div class="slds-p-around_medium">
+            <lightning:input label="학년" value="{!v.grade}" />
+            <lightning:input label="반" value="{!v.classNumber}" />
+            <lightning:input label="이름" value="{!v.name}" />
+            <lightning:button label="조회" variant="brand" onclick="{!c.handleSearch}" />
+        </div>
+    </lightning:card>
+
+    <div>
+        <aura:if isTrue="{!v.students.length > 0}">
+            <p>총 {!v.students.length} 건</p>
+            <lightning:datatable
+                    columns="{!v.columns}"
+                    data="{!v.students}"
+                    keyField="Id"
+                    onrowaction="{!c.navigateToRecordDetail}"
+            />
+            <aura:set attribute="else">
+                <p>검색된 내역이 없습니다.</p>
+            </aura:set>
+        </aura:if>
+    </div>
+</aura:component>
