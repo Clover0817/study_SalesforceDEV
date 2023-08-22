@@ -1,0 +1,42 @@
+/*정상 작동 코드*/
+public with sharing class SearchStudentController {
+    @AuraEnabled
+    public static List<Student> searchStudents(String grade, String classNumber, String name) {
+        String dynamicQuery = 'SELECT Id, Name, Class__r.Grade__c, Class__r.ClassNumber__c FROM Contact WHERE ';
+        Boolean hasConditions = false;
+
+        if (!String.isBlank(grade)) {
+            dynamicQuery += 'Class__r.Grade__c = ' + grade;
+            hasConditions = true;
+        }
+        if (!String.isBlank(classNumber)) {
+            dynamicQuery += hasConditions ? ' AND ' : '';
+            dynamicQuery += 'Class__r.ClassNumber__c = ' + classNumber;
+            hasConditions = true;
+        }
+        if (!String.isBlank(name)) {
+            dynamicQuery += hasConditions ? ' AND ' : '';
+            dynamicQuery += 'Name LIKE \'%' + name + '%\'';
+        }
+
+        List<Student> students = new List<Student>();
+        for (Contact student : Database.query(dynamicQuery)) {
+            students.add(new Student(student));
+        }
+        return students;
+    }
+
+    public class Student {
+        @AuraEnabled public Id Id { get; set; }
+        @AuraEnabled public String Name { get; set; }
+        @AuraEnabled public Integer Grade { get; set; }
+        @AuraEnabled public Integer ClassNumber { get; set; }
+
+        public Student(Contact student) {
+            Id = student.Id;
+            Name = student.Name;
+            Grade = Integer.valueOf(student.Class__r.Grade__c);
+            ClassNumber = Integer.valueOf(student.Class__r.ClassNumber__c);
+        }
+    }
+}
