@@ -1,0 +1,21 @@
+public with sharing class PrintStudentListController {
+    public String recordId { get; set; }
+    public List<List<Contact>> pagesOfContacts { get; set; }
+
+    public PrintStudentListController() {
+        recordId = ApexPages.currentPage().getParameters().get('recordId');
+        List<Contact> allContacts = [SELECT LastName, BirthDate FROM Contact WHERE Class__c =: recordId];
+
+        pagesOfContacts = new List<List<Contact>>();
+        List<Contact> currentPageContacts = new List<Contact>();
+
+        for (Integer i = 0; i < allContacts.size(); i++) {
+            currentPageContacts.add(allContacts[i]);
+
+            if (Math.mod(i + 1, 30) == 0 || i == allContacts.size() - 1) {
+                pagesOfContacts.add(currentPageContacts);
+                currentPageContacts = new List<Contact>();
+            }
+        }
+    }
+}
