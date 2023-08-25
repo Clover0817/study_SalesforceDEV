@@ -1,7 +1,14 @@
-js에서는 sql문 사용 불가-> apex 클래스에서 처리해야<br/><br/>
+js에서는 sql문 사용 불가-> apex 클래스에서 처리해야
 
-console.log('student.Class__r.Grade__c :: ' + student.Class__r.Grade__c);<br/>
-console.log('selectedClass.Grade__c :: ' + selectedClass.Grade__c);<br/><br/>
+js에서 디버깅
+console.log('student.Class__r.Grade__c :: ' + student.Class__r.Grade__c);
+console.log('selectedClass.Grade__c :: ' + selectedClass.Grade__c);
+
+apex class에서 디버깅
+System.debug('CheckClass called');
+System.debug('selectedClass:: ' + selectedClass.Id);
+
+Apex 컨트롤러에서 checkClass 메서드의 반환값이 true로 하드코딩되어 있다면, JavaScript에서 response.getReturnValue() 값이 undefined로 나오는 것은 정상
 
 *VisualForcePage -> PrintStudentList2<br/>
 기존<br/>
