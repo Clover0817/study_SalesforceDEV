@@ -1,0 +1,30 @@
+//미완성 코드
+/**
+ * Created by skdus on 2023-08-25.
+ */
+@IsTest
+private class SearchStudent_test {
+
+    @IsTest
+    static void testSearchStudents() {
+        // 테스트 데이터 생성
+        Class__c testClass = new Class__c(Name = '2023 1학년 1반', ClassNumber__c = 1, Grade__c = 1);
+        insert testClass;
+        Contact testStudent = new Contact(LastName = 'john');
+        insert testStudent;
+//
+//        testStudent.Class__c = testClass.Id;
+//        List<SearchStudentController.Student> listStudent = new List<SearchStudentController.Student>{
+//                new SearchStudentController.Student(testStudent)
+//        };
+
+        List<SearchStudentController.Student> result = SearchStudentController.searchStudents('1', '1', 'john');
+
+        System.assertEquals(1, result.size());
+        SearchStudentController.Student studentResult = result[0];
+        System.assertEquals(testStudent.Id, studentResult.Id);
+        System.assertEquals(testStudent.Name, studentResult.Name);
+        System.assertEquals(Integer.valueOf(testClass.Grade__c), studentResult.Grade);
+        System.assertEquals(Integer.valueOf(testClass.ClassNumber__c), studentResult.ClassNumber);
+    }
+}
