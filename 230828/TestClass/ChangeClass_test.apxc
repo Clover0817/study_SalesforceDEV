@@ -1,0 +1,83 @@
+/**
+ * Created by skdus on 2023-08-25.
+ */
+
+@IsTest
+private class ChangeClass_test {
+    @IsTest static void testGetInitData() {
+        List<Class__c> listClass = new List<Class__c>{
+                new Class__c(Name = '2023 4학년 1반', ClassNumber__c = 1, Grade__c = 4),
+                new Class__c(Name = '2023 4학년 2반', ClassNumber__c = 2, Grade__c = 4)
+        };
+        insert listClass;
+
+        List<Class__c> result = ChangeClassController.getInitData();
+
+        System.assertEquals(listClass.size(), result.size());
+        for (Integer i = 0; i < result.size(); i++) {
+            System.assertEquals(listClass[i].Id, result[i].Id);
+            System.assertEquals(listClass[i].Name, result[i].Name);
+            System.assertEquals(listClass[i].ClassNumber__c, result[i].ClassNumber__c);
+            System.assertEquals(listClass[i].Grade__c, result[i].Grade__c);
+        }
+    }
+
+    @IsTest static void testGetStudentInfo() {
+        Contact student = new Contact(LastName = 'Test');
+        insert student;
+
+        Contact result = ChangeClassController.getStudentInfo(student.Id);
+
+        System.assertEquals(student.Id, result.Id);
+        System.assertEquals(student.Class__r.Grade__c, result.Class__r.Grade__c);
+        System.assertEquals(student.Class__r.ClassNumber__c, result.Class__r.ClassNumber__c);
+
+    }
+
+    @IsTest static void testCheckClass() {
+        Contact student1 = new Contact(LastName = 'Test');
+        insert student1;
+
+        Class__c class1 = new Class__c(Name = '2023 4학년 1반', ClassNumber__c = 1, Grade__c = 4);
+        Class__c class2 = new Class__c(Name = '2023 1학년 1반', ClassNumber__c = 1, Grade__c = 1);
+        Class__c class3 = new Class__c(Name = '2023 1학년 2반', ClassNumber__c = 2, Grade__c = 1);
+        insert class1;
+        insert class2;
+        insert class3;
+
+        Contact student2 = new Contact(LastName = 'Test2');
+        student2.Class__c = class2.Id;
+        insert student2;
+
+        Boolean result = ChangeClassController.checkClass(student1.Id, class1.Id);
+        System.assertEquals(true, result);
+        Boolean result2 = ChangeClassController.checkClass(student2.Id, class1.Id);
+        System.assertEquals(false, result2);
+        Boolean result3 = ChangeClassController.checkClass(student2.Id, class2.Id);
+        System.assertEquals(false, result3);
+        Boolean result4 = ChangeClassController.checkClass(student2.Id, class3.Id);
+        System.assertEquals(true, result4);
+    }
+
+    @IsTest static void testConfirmChangeClass() {
+        Contact student = new Contact(LastName = 'test');
+        Class__c selectedClass = new Class__c(Name = '2023 4학년 1반', ClassNumber__c = 1, Grade__c = 4);
+
+        insert student;
+        insert selectedClass;
+
+        student.Class__c = selectedClass.Id;
+        update student;
+
+        Boolean result = ChangeClassController.confirmChangeClass(student.Id, selectedClass.Id);
+        System.assertEquals(true, result);
+
+        delete student;
+        delete selectedClass;
+
+        Boolean result2 = ChangeClassController.confirmChangeClass(student.Id, selectedClass.Id);
+        System.assertEquals(false, result2);
+
+
+    }
+}
