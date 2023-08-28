@@ -8,3 +8,11 @@ public static List<Contact> searchForContacts(String lastName, String postalCode
     List<Contact> listContact = [SELECT Id, Name FROM Contact WHERE LastName = :lastName AND MailingPostalCode = :postalCode]; <br/>
     return listContact; <br/>
 } <br/>
+
+<br/>
+*개발 표준 naming <br/>
+-test class: _test<br/>
+-batch class: _ba<br/>
+-trigger: _tr<br/>
+-formula: fm_<br/>
+-rollup: ru_<br/>
