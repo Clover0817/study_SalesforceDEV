@@ -1,0 +1,48 @@
+public with sharing class ChangeClassController {
+	@AuraEnabled
+    public static List<Class__c> getInitData() {
+        List<Class__c> listClass = [SELECT Id, Name, ClassNumber__c, Grade__c FROM Class__c];
+
+        return listClass;
+    }
+
+    @AuraEnabled
+    public static Contact getStudentInfo(String recordId) {
+        return [SELECT Id, Class__r.Grade__c, Class__r.ClassNumber__c FROM Contact WHERE Id =: recordId];
+    }
+
+    @AuraEnabled
+    public static Boolean checkClass(String recordId, String selectedClassId) {
+        //System.debug('CheckClass called');
+        Contact student = [SELECT Id, Class__r.Grade__c, Class__r.ClassNumber__c FROM Contact WHERE Id =: recordId];
+        Class__c selectedClass = [SELECT Id, Grade__c, ClassNumber__c FROM Class__c WHERE Id =: selectedClassId];
+        //System.debug('student:: ' + student.Class__c);
+        //System.debug('selectedClass:: ' + selectedClass.Id);
+
+        if (student.Class__c == null) {
+            return true;
+        }else if (student.Class__c == selectedClassId) {
+            return false;
+        }else if (student.Class__r.Grade__c != selectedClass.Grade__c) {
+            return false;
+        }else {
+            return true;
+        }
+    }
+
+    @AuraEnabled
+    public static Boolean confirmChangeClass(String studentId, String selectedClassId) {
+        //System.debug('confirmChangeClass called');
+        Contact student = [SELECT Id, Class__c FROM Contact WHERE Id =: studentId];
+        Class__c selectedClass = [SELECT Id FROM Class__c WHERE Id =: selectedClassId];
+        //System.debug('student:: ' + student.Class__c);
+        //System.debug('selectedClass:: ' + selectedClass.Id);
+        if (student != null && selectedClass != null) {
+            student.Class__c = selectedClass.Id;
+            update student;
+            return true;
+        }else {
+            return false;
+        }
+    }
+}
