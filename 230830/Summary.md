@@ -40,7 +40,6 @@ Test the code: trigger-both positive, negative parts|need assertions<br/>
 마지막으로, insert newCases를 통해 새로운 Case 레코드를 데이터베이스에 추가<br/>
 <br/>
 <br/>
-
 *해결해야 할 문제<br/>
 Challenge Not yet complete... here's what's wrong:<br/>
 Closing a Maintenance Request of type 'Routine Maintenance' or 'Repair' did not join the new Maintenance Request with the correct equipment. The challenge is expecting the new Maintenance Request to be joined to the same Equipment as the closed Maintenance Request.<br/>
