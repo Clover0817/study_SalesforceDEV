@@ -1,0 +1,46 @@
+//automatically create a Routine Maintenance request every time a maintenance request of type Repair or Routine Maintenance is updated to Closed.
+public with sharing class MaintenanceRequestHelper {
+    
+    public static void updateWorkOrders(List<Case> listNew, Map<Id, Case> mapOld) {
+        Set<Id> IdsToUpdate = new Set<Id>();
+        for (Case c : listNew) {
+            if (mapOld.get(c.Id).Status != 'Closed' && c.status == 'closed') {
+                if (c.type == 'Repair' || c.type == 'Routine Maintenance') {
+                    IdsToUpdate.add(c.Id);
+                }
+            }
+        }
+        
+        if (!IdsToUpdate.isEmpty()) {
+            List<Case> newCases = new List<Case>();
+            Map<Id, Case> closedCases = new Map<Id, Case>([SELECT Id, Vehicle__c, ProductId, Product.Maintenance_Cycle__c, (SELECT Id, Equipment__c, Quantity__c FROM Equipment_Maintenance_Items__r)
+                                                           FROM Case 
+                                                           WHERE Id IN :IdsToUpdate]);
+            Map<Id, Decimal> maintenanceCycles = new Map<Id, Decimal>();
+            AggregateResult[] results = [SELECT Maintenance_Request__c, MIN(Equipment__r.Maintenance_Cycle__c)cycle FROM Equipment_Maintenance_Item__c WHERE Maintenance_Request__c IN :IdsToUpdate Group BY Maintenance_Request__c];
+            for (AggregateResult ar : results) {
+                maintenanceCycles.put((Id)ar.get('Maintenance_Request__c'), (Decimal)ar.get('cycle'));
+            }  
+            
+            for (Case closedCase : closedCases.values()) {
+                Case newCase = new Case(ParentId = closedCase.Id, Status = 'New', Subject = 'Routine Maintenance', Type = 'Routine Maintenance', Vehicle__c = closedCase.Vehicle__c, ProductId = closedCase.ProductId, Origin = 'Web', Date_Reported__c = Date.Today());
+                if (maintenanceCycles.containsKey(closedCase.Id)) {
+                    newCase.Date_Due__c = Date.today().addDays((Integer) maintenanceCycles.get(closedCase.Id));
+                }else {
+                    newCase.Date_Due__c = Date.today().addDays((Integer) closedCase.Product.maintenance_Cycle__c);
+                }
+                newCases.add(newCase);
+            }
+            insert newCases;
+            List<Equipment_Maintenance_Item__c> clonedWPs = new List<Equipment_Maintenance_Item__c>();
+            for (Case newCase : newCases) {
+                for (Equipment_Maintenance_Item__c wp : closedCases.get(newCase.ParentId).Equipment_Maintenance_Items__r) {
+                    Equipment_Maintenance_Item__c wpClone = wp.clone();
+                    wpClone.Maintenance_Request__c = newCase.Id;
+                    ClonedWPs.add(wpClone);
+                }
+            }
+            insert ClonedWPs;
+    	}        
+	}
+}
