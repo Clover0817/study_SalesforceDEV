@@ -1,0 +1,46 @@
+//미완성 코드
+public with sharing class MaintenanceRequestHelper { //public with sharing::기본적으로 공개되며, 레코드 공유 규칙에 따라 레코드에 대한 접근 제한
+    
+    public static void updateWorkOrders(List<Case> caseList) {
+        List<Case> newCases = new List<Case>();
+        Map<String, Integer> result = getDueDate(caseList);
+        for (Case c : caseList) {
+            if (c.status == 'closed') {
+                if (c.type == 'Repair' || c.type == 'Routine Maintenance') {
+                    Case newCase = new Case();
+                    newCase.Status = 'New';
+                    newCase.Origin = 'web';
+                    newCase.Type = 'Routine Maintenance';
+                    newCase.Subject = 'Routine Maintenance of Vehicle';
+                    newCase.Vehicle__c = c.Vehicle__c;
+                    newCase.ProductId = c.ProductId;
+                    newCase.Date_Reported__c = Date.today();
+                    if (result.get(c.Id) != null) {
+                        newCase.Date_Due__c = Date.today() + result.get(c.Id);
+                    }else {
+                        newCase.Date_Due__c = Date.today();
+                    }
+                    newCases.add(newCase);
+                }
+            }
+        }
+		insert newCases;        
+    }        
+    
+    public static Map<String, Integer> getDueDate(List<Case> CaseIds) { 
+        Map<String, Integer> result = new Map<String, Integer>();
+        Map<Id, Case> caseKeys = new Map<Id, Case>(CaseIds);
+        List<AggregateResult> wpc = [SELECT Maintenance_Request__r.Id cId, min(Equipment__r.Maintenance_Cycle__c)cycle 
+                                     FROM Equipment_Maintenance_Item__c
+                                     WHERE Maintenance_Request__r.Id in : caseKeys.keySet() GROUP BY Maintenance_Request__r.Id];
+        for (AggregateResult res : wpc) {
+            Integer addDays = 0;
+            if (res.get('cycle') != null) {
+                addDays += Integer.valueOf(res.get('cycle'));
+            }
+            result.put((String)res.get('cID'), addDays);
+        }
+        return result;
+    }
+    
+}
