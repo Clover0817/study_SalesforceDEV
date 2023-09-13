@@ -1,0 +1,37 @@
+//에러: Assertion failed
+@IsTest
+public with sharing class MaintenanceRequestHelperTest {
+    //Routine Maintenance request가 제대로 생성되는지 확인하기 위한 test method
+    static testMethod void testUpdateWorkOrders() {
+        //closed Repair Case 샘플 데이터 생성
+        Vehicle__c vehicle1 = new Vehicle__c(Name='Vehicle123');
+        Product2 product1 = new Product2(Name='Product123');
+        insert vehicle1;
+        insert product1;
+        Case repairCase = new Case(Status='Closed', Type='Repair', Subject='Sample Repair', Vehicle__c=vehicle1.Id, productId=product1.Id);
+        
+        //closed Routine Maintenance Case 샘플 데이터 생성
+        Vehicle__c vehicle2 = new Vehicle__c(Name='Vehicle456');
+        Product2 product2 = new Product2(Name='Product456');
+        insert vehicle2;
+        insert product2;
+        Case routineMaintenanceCase = new Case(Status='Closed', Type='Routine Maintenance', Subject='Sample Maintenance', Vehicle__c=vehicle2.Id, productId=product2.Id);
+    	
+        //샘플 데이터 insert
+        insert new List<Case>{repairCase, routineMaintenanceCase};
+        
+        //mapOld case들을 get(이때의 status는 closed가 아님)
+        Map<Id, Case> mapOld = new Map<Id, Case>{repairCase.Id=>repairCase.clone(false, true), routineMaintenanceCase.Id=>routineMaintenanceCase.clone(false, true)};
+            
+        Test.startTest();
+        
+        //테스트하고자 하는 메서드 호출
+        MaintenanceRequestHelper.updateWorkOrders(new List<Case>{repairCase, routineMaintenanceCase}, mapOld);
+        
+        Test.stopTest();
+        
+        //Routine Maintenance case가 생성되었는지 확인
+        List<Case> maintenanceCases = [SELECT Id, Subject, Type, Vehicle__c, ProductId FROM Case WHERE Status='New' AND Type='Routine Maintenance'];
+        System.assertEquals(2, maintenanceCases.size(), 'Two Routine Maintenance Cases should be created.');
+    }
+}
