@@ -1,0 +1,8 @@
+global with sharing class WarehouseSyncSchedule implements Schedulable {
+    global void execute(SchedulableContext ctx) {
+        System.enqueueJob(new WarehouseCalloutService());
+    }
+}
+
+------------------------Extra Job to do-----------------------
+Setting -> Apex Classes -> New Schedule Apex -> WarehouseSyncSchedule
