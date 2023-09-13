@@ -1,18 +1,18 @@
-//automatically create a Routine Maintenance request every time a maintenance request of type Repair or Routine Maintenance is updated to Closed.
+//MaintenanceRequestHelper 클래스는 유지보수 요청의 업데이트 여부를 모니터하고, 'Closed' 상태로 변경될 때 적절한 작업을 수행하는 클래스
 public with sharing class MaintenanceRequestHelper {
     
-    public static void updateWorkOrders(List<Case> listNew, Map<Id, Case> mapOld) {
+    public static void updateWorkOrders(List<Case> listNew, Map<Id, Case> mapOld) { //listNew는 새로 업데이트된 유지보수 요청의 목록, mapOld는 해당 요청들의 이전 버전에 대한 맵
         Set<Id> IdsToUpdate = new Set<Id>();
-        for (Case c : listNew) {
-            if (mapOld.get(c.Id).Status != 'Closed' && c.status == 'closed') {
-                if (c.type == 'Repair' || c.type == 'Routine Maintenance') {
+        for (Case c : listNew) { //업데이트된 요청 중 'Closed' 상태로 변경된 경우,  유형이 'Repair', 'Routine Maintenance'인 case에 한해서
+            if (mapOld.get(c.Id).Status != 'Closed' && c.status == 'closed') { 
+                if (c.type == 'Repair' || c.type == 'Routine Maintenance') { //새로운 유지보수 요청을 생성하기 위해 해당 요청의 ID를 IdsToUpdate Set에 추가
                     IdsToUpdate.add(c.Id);
                 }
             }
         }
         
-        if (!IdsToUpdate.isEmpty()) {
-            List<Case> newCases = new List<Case>();
+        if (!IdsToUpdate.isEmpty()) { //새로운 유지보수 요청 생성-업데이트된 유지보수 요청의 정보를 사용해 새로운 유지보수 요청을 만들고 필드 설정
+            List<Case> newCases = new List<Case>(); 
             Map<Id, Case> closedCases = new Map<Id, Case>([SELECT Id, Vehicle__c, ProductId, Product.Maintenance_Cycle__c, (SELECT Id, Equipment__c, Quantity__c FROM Equipment_Maintenance_Items__r)
                                                            FROM Case 
                                                            WHERE Id IN :IdsToUpdate]);
@@ -22,9 +22,9 @@ public with sharing class MaintenanceRequestHelper {
                 maintenanceCycles.put((Id)ar.get('Maintenance_Request__c'), (Decimal)ar.get('cycle'));
             }  
             
-            for (Case closedCase : closedCases.values()) {
+            for (Case closedCase : closedCases.values()) { //ParentId를 현재 요청의 ID로 설정해서 연결
                 Case newCase = new Case(ParentId = closedCase.Id, Status = 'New', Subject = 'Routine Maintenance', Type = 'Routine Maintenance', Vehicle__c = closedCase.Vehicle__c, ProductId = closedCase.ProductId, Origin = 'Web', Date_Reported__c = Date.Today());
-                if (maintenanceCycles.containsKey(closedCase.Id)) {
+                if (maintenanceCycles.containsKey(closedCase.Id)) { //Date_Due__c 필드는 유지보수 주기에 따라 설정
                     newCase.Date_Due__c = Date.today().addDays((Integer) maintenanceCycles.get(closedCase.Id));
                 }else {
                     newCase.Date_Due__c = Date.today().addDays((Integer) closedCase.Product.maintenance_Cycle__c);
@@ -32,15 +32,16 @@ public with sharing class MaintenanceRequestHelper {
                 newCases.add(newCase);
             }
             insert newCases;
-            List<Equipment_Maintenance_Item__c> clonedWPs = new List<Equipment_Maintenance_Item__c>();
-            for (Case newCase : newCases) {
+
+            List<Equipment_Maintenance_Item__c> clonedWPs = new List<Equipment_Maintenance_Item__c>(); //기존 요청의 작업 항목을 복제하고, 복제본을 새로 생성된 유지보수 요청에 연결
+            for (Case newCase : newCases) { 
                 for (Equipment_Maintenance_Item__c wp : closedCases.get(newCase.ParentId).Equipment_Maintenance_Items__r) {
                     Equipment_Maintenance_Item__c wpClone = wp.clone();
                     wpClone.Maintenance_Request__c = newCase.Id;
                     ClonedWPs.add(wpClone);
                 }
             }
-            insert ClonedWPs;
+            insert ClonedWPs; //이후 복제된 작업 항목들을 데이터베이스에 삽입
     	}        
 	}
 }
