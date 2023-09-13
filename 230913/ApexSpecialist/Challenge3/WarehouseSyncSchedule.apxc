@@ -1,0 +1,8 @@
+global class WarehouseSyncSchedule implements Schedulable {
+    global void execute(System.schedulableContext context) {
+        WarehouseCalloutService.runWarehouseEquipmentSync();
+    }
+}
+
+-----------------------How To Test--------------------------
+In Anonymous Windows: System.enqueueJob(new WarehouseCalloutService());
