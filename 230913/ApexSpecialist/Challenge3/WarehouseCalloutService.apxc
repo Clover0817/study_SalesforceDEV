@@ -1,13 +1,14 @@
+//WarehouseCalloutService Class는 Queueable 인터페이스를 구현하여 외부 warehouse 시스템으로 REST 호출을 수행하고 그 결과를 Salesforce에 Update하는 기능을 하는 클래스.
 public with sharing class WarehouseCalloutService implements Queueable {
 
-    private static final String WAREHOUSE_URL = 'https://th-superbadge-apex.herokuapp.com/equipment';
+    private static final String WAREHOUSE_URL = 'https://th-superbadge-apex.herokuapp.com/equipment'; // 해당 URL 상수는 외부 warehouse 시스템의 endpoint를 가리킴
     
     //class that makes a REST callout to an external warehouse system to get a list of equipment that needs to be updated.
     //The callout's JSON response returns the equipment records that you upsert in Salesforce.
     
-    @future(callout=true)
+    @future(callout=true) //@future annotation-> 비동기 메서드
     public static void runWarehouseEquipmentSync() {
-        Http http = new Http();
+        Http http = new Http(); //HTTP 요청을 만들어 외부 시스템에 전송
         HttpRequest request = new HttpRequest();
         
         request.setEndpoint(WAREHOUSE_URL);
@@ -16,13 +17,13 @@ public with sharing class WarehouseCalloutService implements Queueable {
         
         List<Product2> warehouseEq = new List<Product2>();
         
-        if (response.getStatusCode() == 200) {
-            List<Object> jsonResponse = (List<Object>)JSON.deserializeUntyped(response.getBody());
+        if (response.getStatusCode() == 200) { //응답이 200(성공)인 경우,
+            List<Object> jsonResponse = (List<Object>)JSON.deserializeUntyped(response.getBody()); //JSON 응답을 파싱하여 Salesforce의 Product2 레코드로 변환하고, 이를 warehouseEq 리스트에 추가
             System.debug(response.getBody());
             
             //class maps the following fields: replacement part (always true), cost, current inventory, lifespan, maintenance cycle, and warehouse SKU
             //warehouse SKU will be externalID for identifying which equipment records to update within Salesforce
-            for (Object eq : jsonResponse) {
+            for (Object eq : jsonResponse) { //JSON 응답에서 추출한 필드들을 Salesforce의 Product2 객체에 매핑
                 Map<String, Object> mapJson = (Map<String, Object>)eq;
                 Product2 myEq = new Product2();
                 myEq.Replacement_Part__c = (Boolean)mapJson.get('replacement');
@@ -36,14 +37,15 @@ public with sharing class WarehouseCalloutService implements Queueable {
                 warehouseEq.add(myEq);
             }
             
-            if (warehouseEq.size() > 0) {
+            if (warehouseEq.size() > 0) {//변환된 레코드들을 upsert로 Salesforce에 Update
                 upsert warehouseEq;
                 System.debug('Your equipment was synced with the warehouse one');
             }
         }
     }
     
-    public static void execute(QueueableContext context) {
-        runWarehouseEquipmentSync();
+    public static void execute(QueueableContext context) { //Queueable 인터페이스를 구현한 메서드. 
+        runWarehouseEquipmentSync(); //외부 시스템에서 장비 정보를 가져와 Salesforce에 업데이트. 가져온 정보는 Product2 레코드로 매핑, Salesforce에 Upsert됨.
+                                     //코드는 비동기적으로 실행되므로 완료까지 기다려야
     }
 }
