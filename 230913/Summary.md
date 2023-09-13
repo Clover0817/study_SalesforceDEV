@@ -25,3 +25,15 @@ REST 엔드포인트는 22개의 레코드를 반환했으므로 Salesforce의 "
 4. 대기 시간: 이 클래스는 Queueable 인터페이스를 구현하므로 비동기로 실행->실행이 완료될 때까지 기다려야 할 수 있음. 실행 후에도 데이터가 업데이트되지 않는 경우 일정 시간을 기다린 후 다시 시도해야.<br/>
 <br/>
 => 해결:WarehouseCalloutService 클래스의 private static final String WAREHOUSE_URL = 'https://th-superbadge-apex.herokuapp.com/equipment' URL을 Setting->Security->Remote Site Settings에 등록<br/>
+<br/>
+*Apex Specialist Challenge4<br/>
+에러 해결: System.StringException: Invalid id: Vehicle123<br/>
+ProductId도 Salesforce ID와 같이 알파벳, 숫자 조합 15/18자?<br/>
+먼저 Vehicle object를 생성하고 해당 object에 부여된 ID 값 사용하도록<br/>
+<br/>
+[About clone method]<br/>
+public SObject clone(Boolean preserveId, Boolean isDeepClone, Boolean preserveReadonlyTimestamps, Boolean preserveAutonumber)<br/>
+-preserveId(optional)- If set to true, the ID is copied to the duplicate, Default is false, the ID is cleared.<br/>
+-isDeepClone(optional)- determines whether the method creates a full copy of the SObject field or just a reference.<br/>
+-참고: https://developer.salesforce.com/docs/atlas.en-us.apexref.meta/apexref/apex_methods_system_sobject.htm#apex_System_SObject_clone<br/>
+<br/>
