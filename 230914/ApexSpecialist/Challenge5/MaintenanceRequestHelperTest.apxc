@@ -1,0 +1,137 @@
+//Code Coverage: 96% -> must be 100%
+/*
+if (maintenanceCycles.containsKey(closedCase.Id)) {
+                    newCase.Date_Due__c = Date.today().addDays((Integer) maintenanceCycles.get(closedCase.Id));
+                }else {
+                    newCase.Date_Due__c = Date.today().addDays((Integer) closedCase.Product.maintenance_Cycle__c); // test 통과 안된 부분
+                }
+*/
+
+@IsTest
+public with sharing class MaintenanceRequestHelperTest {
+    private static final String STATUS_NEW = 'New';
+    private static final String WORKING = 'Working';
+    private static final String CLOSED = 'Closed';
+    private static final String REPAIR = 'Repair';
+    private static final String REQUEST_ORIGIN = 'Web';
+    private static final String REQUEST_TYPE = 'Routine Maintenance';
+    private static final String REQUEST_SUBJECT = 'Testing subject';
+    
+    private static Vehicle__c createVehicle() {
+        Vehicle__c vehicle = new Vehicle__c(name='SuperTruck');
+        return vehicle;
+    }
+    
+    private static Product2 createEq() {
+        Product2 equipment = new Product2(name='SuperEquipment', lifespan_months__c=10, maintenance_cycle__c=10, replacement_part__c=true);
+        return equipment;
+    }
+    
+    private static Case createMaintenanceRequest(Id vehicleId, Id equipmentId) {
+        Case cs = new Case(Type=REPAIR, Status=STATUS_NEW, Origin=REQUEST_ORIGIN, Subject=REQUEST_SUBJECT, Vehicle__c=vehicleId);
+        return cs;
+    }
+    
+    private static Equipment_Maintenance_Item__c createWorkPart(Id equipmentId, Id requestId) {
+        Equipment_Maintenance_Item__c wp = new Equipment_Maintenance_Item__c(Equipment__c=equipmentId, Maintenance_Request__c=requestId);
+        return wp;
+    }
+    
+    @IsTest
+    private static void testMaintenanceRequestPositive() {
+        Vehicle__c vehicle = createVehicle();
+        insert vehicle;
+        Id vehicleId = vehicle.Id;
+        
+        Product2 equipment = createEq();
+        insert equipment;
+        Id equipmentId = equipment.Id;
+        
+        Case somethingToUpdate = createMaintenanceRequest(vehicleId, equipmentId);
+        insert somethingToUpdate;
+        
+        Equipment_Maintenance_Item__c workP = createWorkPart(equipmentId, somethingToUpdate.Id);
+        insert workP;
+        
+        test.startTest();
+        somethingToUpdate.status = CLOSED;
+        update somethingToUpdate;
+        test.stopTest();
+        
+        Case newReq = [SELECT Id, Subject, Type, Date_Reported__c, Vehicle__c, Date_Due__c FROM Case WHERE Status =: STATUS_NEW];
+        Equipment_Maintenance_Item__c workPart = [SELECT Id FROM Equipment_Maintenance_Item__c WHERE Maintenance_Request__c =: newReq.Id];
+        
+        System.assert(workPart != null);
+        System.assert(newReq.Subject != null);
+        System.assertEquals(newReq.Type, REQUEST_TYPE);
+        System.assertEquals(newReq.Vehicle__c, vehicleId);
+        System.assertEquals(newReq.Date_Reported__c, System.today());
+    }
+    
+    @IsTest
+    private static void testMaintenanceRequestNegative() {
+        Vehicle__c vehicle = createVehicle();
+        insert vehicle;
+        Id vehicleId = vehicle.Id;
+        
+        Product2 equipment = createEq();
+        insert equipment;
+        Id equipmentId = equipment.Id;
+        
+        Case emptyReq = createMaintenanceRequest(vehicleId, equipmentId);
+        insert emptyReq;
+        
+        Equipment_Maintenance_Item__c workP = createWorkPart(equipmentId, emptyReq.Id);
+        insert workP;
+        
+        test.startTest();
+        emptyReq.Status = WORKING;
+        update emptyReq;
+        test.stopTest();
+        
+        List<Case> allRequest = [SELECT Id FROM Case];
+        Equipment_Maintenance_Item__c workPart = [SELECT Id FROM Equipment_Maintenance_Item__c WHERE Maintenance_Request__c =: emptyReq.Id];
+        
+        System.assert(workPart != null);
+        System.assert(allRequest.size() == 1);
+    }
+    
+    @IsTest
+    private static void testMaintenanceRequestBulk() {
+        List<Vehicle__c> listVehicle = new List<Vehicle__c>();
+        List<Product2> listEquipment = new List<Product2>();
+        List<Equipment_Maintenance_Item__c> listWorkPart = new List<Equipment_Maintenance_Item__c>();
+        List<Case> listRequest = new List<Case>();
+        List<Id> oldRequestIds = new List<Id>();
+        
+        for (Integer i = 0; i < 300; i++) {
+        	listVehicle.add(createVehicle());
+            listEquipment.add(createEq()); 
+        }
+        insert listVehicle;
+        insert listEquipment;
+         
+        for (Integer i = 0; i < 300; i++) {
+            listRequest.add(createMaintenanceRequest(listVehicle.get(i).Id, listEquipment.get(i).Id));
+		}
+        insert listRequest;
+        
+        for (Integer i = 0; i < 300; i++) {
+            listWorkPart.add(createWorkPart(listEquipment.get(i).Id, listRequest.get(i).Id));
+        }
+        insert listWorkPart;
+        
+        test.startTest();
+        for (Case req : listRequest) {
+            req.Status = CLOSED;
+            oldRequestIds.add(req.Id);
+        }
+        update listRequest;
+        test.stopTest();
+        
+        List<Case> allRequests = [SELECT Id FROM Case WHERE Status =: STATUS_NEW];
+        List<Equipment_Maintenance_Item__c> workParts = [SELECT Id FROM Equipment_Maintenance_Item__c WHERE Maintenance_Request__c in: oldRequestIds];
+        
+        System.assert(allRequests.size() == 300);
+    }
+} 
