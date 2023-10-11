@@ -1,25 +1,25 @@
 public class UpdatePageLayout {
 	//Add custom field to page layout
-    public Metadata.Layout buildLayout() {
+    public Metadata.Layout buildLayout() { 
         //Retrieve Account layout and section
-        List<Metadata.Metadata> layouts = Metadata.Operations.retrieve(Metadata.MetadataType.Layout, new List<String> {'Account-Account Layout'});
+        List<Metadata.Metadata> layouts = Metadata.Operations.retrieve(Metadata.MetadataType.Layout, new List<String> {'Account-Account Layout'}); // 'Account-Account Layout'이라는 레이아웃의 메타데이터를 가져옴. 해당 메타데이터에는 레이아웃의 섹션 및 열이 포함되어 있음
         Metadata.Layout layoutMd = (Metadata.Layout)layouts.get(0);
-        Metadata.LayoutSection layoutSectionToEdit = null;
+        Metadata.LayoutSection layoutSectionToEdit = null; //수정할 섹션을 나타내는 변수 초기화
         List<Metadata.LayoutSection> layoutSections = layoutMd.layoutSections;
-        for (Metadata.LayoutSection section : layoutSections) {
-            if (section.label == 'Account Information') {
-                layoutSectionToEdit = section;
+        for (Metadata.LayoutSection section : layoutSections) { //레이아웃의 각 섹션을 순회하면서
+            if (section.label == 'Account Information') { //레이블이 'Account Information'인 섹션을 찾고
+                layoutSectionToEdit = section; //찾으면 이 섹션을 layoutSectionToEdit에 할당
                 break;
             }
         }
         //Add the field under Account info section in the left column
-        List<Metadata.LayoutColumn> layoutColumns = layoutSectionToEdit.layoutColumns;
-        List<Metadata.LayoutItem> layoutItems = layoutColumns.get(0).layoutItems;
+        List<Metadata.LayoutColumn> layoutColumns = layoutSectionToEdit.layoutColumns; //선택된 섹션의 열 목록
+        List<Metadata.LayoutItem> layoutItems = layoutColumns.get(0).layoutItems; //선택된 열의 레이아웃 아이템 목록
         //Create a new layout item for the custom field
-        Metadata.LayoutItem item = new Metadata.LayoutItem();
-        item.behavior = Metadata.UiBehavior.Edit;
-        item.field = 'AMAPI__Apex_MD_API_sample_field__c';
-        layoutItems.add(item);
-        return layoutMd;
+        Metadata.LayoutItem item = new Metadata.LayoutItem(); //새로운 레이아웃 아이템 생성
+        item.behavior = Metadata.UiBehavior.Edit; //아이템의 동작을 'Edit'으로 설정
+        item.field = 'AMAPI__Apex_MD_API_sample_field__c';//이 아이템이 표시할 필드 설정
+        layoutItems.add(item); //새로운 레이아웃 아이템을 선택된 열에 추가
+        return layoutMd; //업데이트된 레이아웃 메타데이터 반환
     }
 }
