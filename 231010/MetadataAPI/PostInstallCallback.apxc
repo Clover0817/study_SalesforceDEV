@@ -1,11 +1,11 @@
-public class PostInstallCallback implements Metadata.DeployCallback {
-    public void handleResult(Metadata.DeployResult result, Metadata.DeployCallbackContext context) {
-        if (result.status == Metadata.DeployStatus.Succeeded) {
+public class PostInstallCallback implements Metadata.DeployCallback { //해당 인터페이스를 구현함으로써, 메타데이터 배포 작업이 완료된 후에 호출되는 콜백을 정의할 수 있음
+    public void handleResult(Metadata.DeployResult result, Metadata.DeployCallbackContext context) { //result: 메타데이터 배포 결과를 나타내는 객체. 배포 작업의 상태 및 세부정보가 포함됨/context: 배포 콜백의 컨텍스트를 나타내는 객체. 배포 작업의 추가적인 정보
+        if (result.status == Metadata.DeployStatus.Succeeded) {  //배포 결과의 상태 확인
 			//Deployment was successful, take appropriate action
-			System.debug('Deployment Succeeded!');
+			System.debug('Deployment Succeeded!'); //성공
         } else {
             //Deployment wasn't successful, take appropriate action.
-            System.debug('Deployment Failed!');
+            System.debug('Deployment Failed!'); //실패
         }
     }
 }
