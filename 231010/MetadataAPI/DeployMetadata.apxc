@@ -1,18 +1,18 @@
-public class DeployMetadata {
+public class DeployMetadata { //메타데이터 배포를 위한 컨테이너를 생성하고, 그 안에 페이지 레이아웃의 메타데이터 추가. 해당 컨테이너를 사용해 배포를 시작하고, 배포 완료 후 지정된 콜백 실행
 	//Create metadata container
     public Metadata.DeployContainer constructDeploymentRequest() {
         Metadata.DeployContainer container = new Metadata.DeployContainer();
         //Add components to container
-        Metadata.Layout layoutMetadata = new UpdatePageLayout().buildLayout();
-        container.addMetadata(layoutMetadata);
+        Metadata.Layout layoutMetadata = new UpdatePageLayout().buildLayout();//UpdatePageLayout 클래스의 'buildLayout' 메서드를 호출해 페이지 레이아웃의 메타데이터를 가져옴
+        container.addMetadata(layoutMetadata); //가져온 레이아웃 메타데이터를 컨테이너에 추가
         return container;
     }
     
     //Deploy metadata
     public void deploy(Metadata.DeployContainer container) {
         //Create callback.
-        PostInstallCallback callback = new PostInstallCallback();
+        PostInstallCallback callback = new PostInstallCallback(); //클래스의 인스턴스를 생성해 배포 완료 후 실행할 콜백 설정
         //Deploy the container with the new components.
-        Id asyncResultId = Metadata.Operations.enqueueDeployment(container, callback);
+        Id asyncResultId = Metadata.Operations.enqueueDeployment(container, callback); //컨테이너를 배포 큐에 추가하고, 결과의 비동기 작업 ID를 반환
     }
 }
