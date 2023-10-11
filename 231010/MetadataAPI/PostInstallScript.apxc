@@ -1,8 +1,8 @@
 public class PostInstallScript implements InstallHandler {
 	//Deploy post-install metadata
-    public void onInstall(InstallContext context) {
-        DeployMetadata deployUtil = new DeployMetadata();
-        Metadata.DeployContainer container = deployUtil.constructDeploymentRequest();
-        deployUtil.deploy(container);
+    public void onInstall(InstallContext context) { 
+        DeployMetadata deployUtil = new DeployMetadata(); //DeployMetadata 클래스는 메타데이터 배포와 관련된 유틸리티 제공
+        Metadata.DeployContainer container = deployUtil.constructDeploymentRequest(); //DeployMetadata 클래스의 constructDeploymentRequest 메서드를 호출하여 메타데이터 배포 컨테이너를 생성. (이 컨테이너에는 배포할 메타데이터가 포함됨)
+        deployUtil.deploy(container); //DeployMetadata 클래스의 deploy 메서드를 호출해 메타데이터를 배포. (컨테이너를 사용해 배포 시작)
     }
 }
